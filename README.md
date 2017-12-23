@@ -1,8 +1,10 @@
+# rub2
+
 * There's the rub
 
 wrapper for torque qsub
 
-* sample
+## sample
 
 ```ruby
 require 'rub2'
@@ -43,44 +45,44 @@ submit "WithOptions" do
 end
 ```
 
-* 使い方
+## 使い方
 
 submit "JobName"で指定された名前でジョブを作成します。
 submitブロック内でexecute_withの引数に配列を渡すと、配列の要素数分JobArrayを作成して、execute_withから返された文字列をbashの引数として実行します。
 jobが全て成功するとsubmitブロックはtrueを返します。
 
-* オプション
+## オプション
 
-** log
+### log
 
 ログファイル出力先。未指定の場合はカレントフォルダにログディレクトリを作成します。
 
-** resource
+### resource
 
 qsub -lオプション。リソース名 => 値のハッシュを渡してください。
 
-** array_request
+### array_request
 
 実行するarray index。1-10の時は1..10のようにRangeを、1,2,4の時は[1,2,4]と配列を渡してください。
 
-** inherit_environment
+### inherit_environment
 
 qsub -Vオプション。環境変数を引き継ぎます。
 
-** dry_run
+### dry_run
 
 実行せずにsubmitするスクリプトを表示します。デバッグ向け。
 
-** max_retry
+### max_retry
 
 max retry count
 
-* ハンドラ
+## ハンドラ
 
 ジョブが成功した場合にはon_doneハンドラ、一つでも失敗した場合はon_failハンドラで指定されたブロックを実行します。
 未指定の場合はデフォルトハンドラを実行し、失敗したジョブがあれば表示します。
 
 
-その他
+## その他
 
 各jobの結果はRinda(dRuby)サーバーで受け取ります。 ネットワーク不調などにより結果が受け取れず終了しないときは適当にctrl-cで終らせてくさい。
