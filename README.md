@@ -1,7 +1,5 @@
 # rub2
 
-* There's the rub
-
 wrapper for torque qsub
 
 ## sample
