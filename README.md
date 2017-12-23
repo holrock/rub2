@@ -1,14 +1,15 @@
 * There's the rub
 
-wrapper for qsub
+wrapper for torque qsub
 
-* サンプル
+* sample
 
+```ruby
 require 'rub2'
 
 submit "SimpleJob" do
-  execute_with Dir.glob("/etc/*.conf") do |dotfile|
-     "wc -l #{dotfile}"
+  execute_with Dir.glob("/etc/*.conf") do |file|
+     "wc -l #{file}"
   end
 end
 # exit if job failed
@@ -40,6 +41,7 @@ submit "WithOptions" do
     end
   end
 end
+```
 
 * 使い方
 
