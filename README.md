@@ -2,6 +2,12 @@
 
 wrapper for torque qsub
 
+## install
+
+```shell
+gem install rub2
+```
+
 ## sample
 
 ```ruby
