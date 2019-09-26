@@ -21,11 +21,12 @@ end
 # exit if job failed
 
 
-submit "WithOptions" do
-  log 'log/test.log'                                              # log file path
+submit "WithOptions" do |jobname|
+  log "log/#{jobname}.log"                                              # log file path
   resource 'nodes' => '1:ppn=4', 'mem' => '15mb'                  # qsub -l option
   array_request 2..4 # or array_request [1, 3]                    # qsub -t option
   inherit_environment                                             # qsub -V option
+  queue 'batch'                                                   # qsub -q option
   continue_on_error                                               # don't exit on job failed
   dry_run                                                         # output script and exit. no execute
 
