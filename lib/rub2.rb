@@ -101,11 +101,13 @@ cd $PBS_O_WORKDIR
 echo "job start: $(date -Iminute)"
 echo "$PBS_O_HOST -> $(hostname): $PBS_JOBNAME $PBS_JOBID (cwd: $PWD)"
 echo "execute: ${CMD[$ID]}"
+START_TIME=$(date +%s)
 bash -c "set -e; set -o pipefail; ${CMD[$ID]}"
 RET=$?
 echo "job exit: $RET at: $(date -Iminute)"
+EXIT_TIME=$(date +%s)
 for i in {0..10}; do
-  ruby -r drb -e "DRbObject.new_with_uri('<%= @uri %>').write([<%= Process.pid %>, '$PBS_JOBID', $PBS_ARRAYID, '$HOSTNAME', $RET])"
+  ruby -r drb -e "DRbObject.new_with_uri('<%= @uri %>').write([<%= Process.pid %>, '$PBS_JOBID', $PBS_ARRAYID, '$HOSTNAME', $RET, $START_TIME, $EXIT_TIME])"
   if [ $? -eq 0 ]; then
     exit $RET
   fi
@@ -282,10 +284,12 @@ EOS
 
     # block thread
     def collect_job_result(job_store)
-      _pid, job_id, array_id, host, exit_code = @drb.take([@pid, nil, nil, nil, nil], @timeout)
+      _pid, job_id, array_id, host, exit_code, start_time, exit_time = @drb.take([@pid, nil, nil, nil, nil, nil, nil], @timeout)
       job_store.update_exit_code([{:array_id => array_id, :exit_code => exit_code}])
       @success_count += 1 if exit_code == 0
-      Rub2.putlog "#{job_id}(#{host}) => #{exit_code}\t(#{@success_count}/#{@job_count})"
+      t = Time.at(exit_time) - Time.at(start_time)
+      min, sec = t.divmod(60)
+      Rub2.putlog "#{job_id}(#{host}) => #{exit_code}\t[#{min}m#{sec.truncate}s]\t(#{@success_count}/#{@job_count})"
     end
   end
 
