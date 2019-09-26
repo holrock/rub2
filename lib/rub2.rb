@@ -387,11 +387,16 @@ EOS
 
       @script.build
 
-
       if @dry_run
         puts @script.source
         return
       end
+
+      if @script.commands.empty?
+        raise "Empty commands"
+        return
+      end
+
       @jobid << submit_qsub(@script.source)
       @job_store.init_job(@jobid.first, @script.array_request, @max_retry_count)
     end
@@ -415,7 +420,7 @@ EOS
       else
         results.each do |aid, ret|
           unless ret == 0
-            Rub2.putlog "array job failed: #{ret}"
+            Rub2.putlog "array job[#{aid}] failed: #{ret}"
           end
         end
       end
@@ -468,7 +473,7 @@ EOS
       end
       jobid =~ /\A(\d+)/
       jobid = $1
-      Rub2.putlog "job submited: #{jobid}[#{array_option || @script.make_array_request_string}]"
+      Rub2.putlog "job submited: #{@script.name} -> #{jobid}[#{array_option || @script.make_array_request_string}]"
       return jobid
     end
 
@@ -480,7 +485,6 @@ EOS
       Rub2.putlog "start Rinda Server: #{@uri}"
       return @uri
     end
-
   end
 end
 
@@ -488,7 +492,7 @@ end
 def submit(name, &block)
   raise "Empty name" if name.empty?
   job = Rub2::Manager.new(name)
-  job.instance_eval(&block)
+  job.instance_exec(name, &block)
   job.submit
   return job.wait_finish
 end
