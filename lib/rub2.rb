@@ -14,9 +14,16 @@ module Rub2
   module_function :putlog
 
   class JobScript
-    attr_accessor :log, :shell, :resource, :array_request,
-      :inherit_environment, :commands, :log_path, :uri
-    attr_reader :source
+    attr_accessor :log,
+                  :shell,
+                  :resource,
+                  :array_request,
+                  :inherit_environment,
+                  :commands,
+                  :log_path,
+                  :uri,
+                  :queue
+    attr_reader :source, :name
 
     def initialize(name)
       @name = name
@@ -56,6 +63,7 @@ module Rub2
       t = Time.now.strftime('%Y%m%d_%H%M%S')
       Pathname.new(Dir.pwd).join("log_#{t}", "#{name}.log")
     end
+
     # return key=value[,key=value]
     def make_pbs_resources_string
       return '' if @resource.empty?
@@ -78,6 +86,9 @@ module Rub2
 <%- end -%>
 <%- if @inherit_environment -%>
 #PBS -V
+<%- end -%>
+<%- if @queue -%>
+#PBS -q <%= @queue %>
 <%- end -%>
 
 CMD=(
@@ -105,7 +116,6 @@ exit $RET
 EOS
 
     end
-
 
     class Job
       attr_reader :parent_id, :array_id, :exit_code, :died_at
@@ -292,7 +302,6 @@ EOS
     # execute_with array (, arrays) do |arg1 (, args...)|
     #   return command_string
     # end
-
     def execute_with(first, *rest, &block)
       commands = []
       first.zip(*rest) do |i|
@@ -343,6 +352,10 @@ EOS
 
     def inherit_environment
       @script.inherit_environment = true
+    end
+
+    def queue(q)
+      @script.queue = q
     end
 
     def continue_on_error
